@@ -206,6 +206,7 @@ let
               windows = "Windows";
               cygwin = "CYGWIN_NT";
               darwin = "Darwin";
+              ios = "Darwin";
               netbsd = "NetBSD";
               freebsd = "FreeBSD";
               openbsd = "OpenBSD";

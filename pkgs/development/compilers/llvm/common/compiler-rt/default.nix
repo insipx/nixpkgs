@@ -197,7 +197,9 @@ stdenv.mkDerivation (finalAttrs: {
       (lib.cmakeFeature "SANITIZER_MIN_OSX_VERSION" stdenv.hostPlatform.darwinMinVersion)
       # `COMPILER_RT_DEFAULT_TARGET_ONLY` does not apply to Darwin:
       # https://github.com/llvm/llvm-project/blob/27ef42bec80b6c010b7b3729ed0528619521a690/compiler-rt/cmake/base-config-ix.cmake#L153
-      (lib.cmakeBool "COMPILER_RT_ENABLE_IOS" false)
+      (lib.cmakeBool "COMPILER_RT_ENABLE_IOS" stdenv.hostPlatform.isiOS)
+      (lib.cmakeBool "COMPILER_RT_ENABLE_TVOS" false)
+      (lib.cmakeBool "COMPILER_RT_ENABLE_WATCHOS" false)
     ]
   )
   ++ lib.optionals (noSanitizers && lib.versionAtLeast release_version "19") [
@@ -255,16 +257,28 @@ stdenv.mkDerivation (finalAttrs: {
             --replace-fail 'find_program(CODESIGN codesign)' ""
         '';
 
-  preConfigure = lib.optionalString stdenv.hostPlatform.isDarwin ''
-    cmakeFlagsArray+=(
-      "-DDARWIN_macosx_CACHED_SYSROOT=$SDKROOT"
-      "-DDARWIN_macosx_OVERRIDE_SDK_VERSION=$(jq -r .Version "$SDKROOT/SDKSettings.json")"
-    )
-  '';
+  preConfigure = lib.optionalString stdenv.hostPlatform.isDarwin (
+    if stdenv.hostPlatform.isiOS then
+      # set simulator sysroot as well just for version check.
+      ''
+        cmakeFlagsArray+=(
+          "-DDARWIN_iphoneos_CACHED_SYSROOT=$SDKROOT"
+          "-DDARWIN_iphoneos_OVERRIDE_SDK_VERSION=$(jq -r .Version "$SDKROOT/SDKSettings.json")"
+          "-DDARWIN_iphonesimulator_CACHED_SYSROOT=$SDKROOT"
+        )
+      ''
+    else
+      ''
+        cmakeFlagsArray+=(
+          "-DDARWIN_macosx_CACHED_SYSROOT=$SDKROOT"
+          "-DDARWIN_macosx_OVERRIDE_SDK_VERSION=$(jq -r .Version "$SDKROOT/SDKSettings.json")"
+        )
+      ''
+  );
 
   # Hack around weird upstream RPATH bug
   postInstall =
-    lib.optionalString (stdenv.hostPlatform.isDarwin) ''
+    lib.optionalString stdenv.hostPlatform.isMacOS ''
       ln -s "$out/lib"/*/* "$out/lib"
     ''
     + lib.optionalString (useLLVM && stdenv.hostPlatform.isLinux) ''
