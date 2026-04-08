@@ -310,9 +310,10 @@ rec {
     config = "arm64-apple-ios";
     # config = "aarch64-apple-darwin14";
     darwinSdkVersion = "26.3";
+    # IPHONEOS_DEPLOYMENT_TARGET. setting this too low may result in failures.
+    darwinMinVersion = "14";
     xcodeVer = "26.3";
     xcodePlatform = "iPhoneOS";
-    useLLVM = true;
     # useiOSPrebuilt = true;
   };
 

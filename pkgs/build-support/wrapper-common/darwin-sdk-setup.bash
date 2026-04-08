@@ -12,5 +12,5 @@ if [[ "@darwinMinVersion@" ]]; then
 
     # xcbuild needs `SDKROOT` to be the name of the SDK, which it sets in its own wrapper,
     # but compilers expect it to point to the absolute path.
-    export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    export SDKROOT="$DEVELOPER_DIR/Platforms/@xcodePlatform@.platform/Developer/SDKs/@xcodePlatform@.sdk"
 fi

@@ -60,7 +60,10 @@ stdenvNoCC.mkDerivation (
 
     src =
       if stdenv.hostPlatform.isiOS then
-        (callPackage ./common/fetch-ios-sdk.nix { }) { inherit sdkPlatform; version = sdkVersion; }
+        (callPackage ./common/fetch-ios-sdk.nix { }) {
+          inherit sdkPlatform;
+          version = sdkVersion;
+        }
       else
         fetchSDK sdkInfo;
 
